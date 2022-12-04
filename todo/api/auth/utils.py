@@ -1,28 +1,20 @@
-from datetime import timedelta, datetime
+from datetime import datetime, timedelta
 from typing import Any, Literal, Optional
-from fastapi import Depends
 
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
 
 from app.user.models import User
 from core.config import JWT_ALGORITH, JWT_EXPIRATION, JWT_SECRET_KEY
-from core.db.database import SessionLocal
+from core.db import get_db
 from exceptions.auth import TokenException
 
 bcrypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
 oauth2_bearer = OAuth2PasswordBearer(tokenUrl='token')
 
 from jose import JWTError, jwt
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 def get_password_hash(password) -> str:
@@ -59,7 +51,7 @@ def decode_token(token: str) -> dict:
 
 
 async def get_current_user(token: str = Depends(oauth2_bearer),
-                           db: Session = Depends(get_db)) -> User:
+                           db: Session = Depends(get_db)) -> Any:
     try:
         payload = decode_token(token)
         username = payload.get('sub')

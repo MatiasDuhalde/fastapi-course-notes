@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Any, Optional
 
 from fastapi import APIRouter, Depends
 from pydantic import BaseModel, Field
@@ -6,19 +6,10 @@ from sqlalchemy.orm import Session
 
 from api.auth.utils import get_current_user
 from app.todo.models import Todo
-from app.user.models import User
-from core.db import SessionLocal
+from core.db import get_db
 from exceptions.todo import TodoNotFoundException
 
 todo_router = APIRouter()
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 class CreateTodoSchema(BaseModel):
@@ -40,13 +31,13 @@ async def get_all(db: Session = Depends(get_db)):
 
 
 @todo_router.get('/user')
-async def get_user_todos(user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+async def get_user_todos(user: Any = Depends(get_current_user), db: Session = Depends(get_db)):
     return db.query(Todo).filter_by(owner_id=user.id).all()
 
 
 @todo_router.get('/{todo_id}')
 async def get_todo(todo_id: int,
-                   user: User = Depends(get_current_user),
+                   user: Any = Depends(get_current_user),
                    db: Session = Depends(get_db)):
 
     todo_model = db.query(Todo).filter_by(id=todo_id, owner_id=user.id).first()
@@ -57,7 +48,7 @@ async def get_todo(todo_id: int,
 
 @todo_router.post('/')
 async def create_todo(todo: CreateTodoSchema,
-                      user: User = Depends(get_current_user),
+                      user: Any = Depends(get_current_user),
                       db: Session = Depends(get_db)):
     todo_model = Todo(
         **todo.dict(),
@@ -73,7 +64,7 @@ async def create_todo(todo: CreateTodoSchema,
 @todo_router.put('/{todo_id}')
 async def update_todo(todo_id: int,
                       todo: UpdateTodoSchema,
-                      user: User = Depends(get_current_user),
+                      user: Any = Depends(get_current_user),
                       db: Session = Depends(get_db)):
     todo_model = db.query(Todo).filter_by(id=todo_id, owner_id=user.id).first()
     if todo_model:
@@ -87,7 +78,7 @@ async def update_todo(todo_id: int,
 
 @todo_router.delete('/{todo_id}')
 async def delete_todo(todo_id: int,
-                      user: User = Depends(get_current_user),
+                      user: Any = Depends(get_current_user),
                       db: Session = Depends(get_db)):
     todo_model = db.query(Todo).filter_by(id=todo_id, owner_id=user.id).first()
     if todo_model:

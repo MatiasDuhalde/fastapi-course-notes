@@ -1,7 +1,7 @@
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 
-from core.db import Base
+from core.db import Base, engine
 
 
 class Todo(Base):
@@ -15,3 +15,6 @@ class Todo(Base):
     completed = Column(Boolean, nullable=False, default=False)
 
     owner = relationship('User', back_populates='todos')
+
+
+Base.metadata.create_all(bind=engine)
