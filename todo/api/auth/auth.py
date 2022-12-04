@@ -5,20 +5,11 @@ from fastapi.security import OAuth2PasswordRequestForm
 from pydantic import BaseModel, EmailStr, Field, SecretStr
 from sqlalchemy.orm import Session
 
-from api.auth.utils import (authenticate_user, create_access_token, get_password_hash)
+from api.auth.utils import (authenticate_user, create_access_token, get_db, get_password_hash)
 from app.user.models import User
-from core.db import SessionLocal
 from exceptions.auth import AuthenticationErrorException
 
 auth_router = APIRouter()
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 class CreateUser(BaseModel):
@@ -70,5 +61,5 @@ async def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise AuthenticationErrorException()
-    access_token = create_access_token(data={'sub': user.username})
+    access_token = create_access_token(user.username, user.id)
     return {'access_token': access_token, 'token_type': 'bearer'}
