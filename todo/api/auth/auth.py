@@ -28,6 +28,7 @@ class CreateUser(BaseModel):
                 'email': 'johndoe@example.com',
                 'first_name': 'John',
                 'last_name': 'Doe',
+                'phone_number': '1234567890'
             }
         }
 
