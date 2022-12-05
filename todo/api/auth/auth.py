@@ -18,6 +18,7 @@ class CreateUser(BaseModel):
     email: EmailStr = Field(title='Email')
     first_name: Optional[str] = Field(None, title='First Name', max_length=100)
     last_name: Optional[str] = Field(None, title='Last Name', max_length=100)
+    phone_number: Optional[str] = Field(None, title='Phone Number', max_length=30)
 
     class Config:
         schema_extra = {
@@ -36,6 +37,7 @@ class CreateUserResponse(BaseModel):
     email: EmailStr
     first_name: Optional[str]
     last_name: Optional[str]
+    phone_number: Optional[str]
 
 
 @auth_router.post('/users')
@@ -45,6 +47,7 @@ async def create_user(user: CreateUser, db: Session = Depends(get_db)):
         email=user.email,
         first_name=user.first_name,
         last_name=user.last_name,
+        phone_number=user.phone_number,
         hashed_password=get_password_hash(user.password.get_secret_value()),
     )
 
